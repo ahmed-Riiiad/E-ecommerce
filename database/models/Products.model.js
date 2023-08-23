@@ -1,0 +1,91 @@
+import mongoose from "mongoose"
+
+
+ const ProductSchema = mongoose.Schema(
+    {
+        Title:{
+            type:String,
+            require:true,
+            unique : [true,'Product already exist']  ,
+            trim:[true],
+            minlength:[2]
+        },
+     slug:{
+        type: String,
+        require:true,
+        lowercase:true
+        
+     },
+        Price:{
+            type:Number,
+            require:true,
+            min : 0 
+        },
+        PriceAfterDisc:{
+            type:Number,
+            min : 0 
+        },
+        RatingAverage:{
+            type:Number,
+            min:[1,'Must be more than 1'],
+            max:[5,'Must be less than 1']
+        },
+        RatingCount:{
+            type:Number,
+            min: 0,
+            default: 0
+        },
+        Description: {
+            type:String,
+            minlength:[5,'too short'],
+            trim:true
+        },
+        quantity : {
+            type:Number,
+            min : 0 ,
+            default:0,
+            required : [true,'product quantity required ']
+        },
+        sold :{
+            type:Number,
+            min: 0,
+            default: 0
+        },
+        imgCover :String,
+        imgs: [String],
+        category :{
+            type:mongoose.Types.ObjectId,
+            ref : 'category',
+            required : [true,'product category required ']
+        },
+        Subcategory :{
+            type:mongoose.Types.ObjectId,
+            ref : 'Subcategory',
+            required : [true,'product Subcategory required ']
+        },
+        Brand :{
+            type:mongoose.Types.ObjectId,
+            ref : 'Brand',
+            required : [true,'product Brand required ']
+        }
+    }, {
+        timestamps: true,
+    }
+)
+
+ProductSchema.post('init',(doc)=>{
+    doc.imgCover= process.env.Base_Url +"/product/"+ doc.imgCover
+    doc.imgs = doc.imgs.map((path=>process.env.Base_Url +"/product/"+ path))
+})
+
+ProductSchema.virtual('myReview',{
+    localField:'_id',
+    foreignField:'productRouter',
+    ref : 'Review'
+})
+
+ProductSchema.pre('/^find/',function(){
+    this.populate('myReview')
+})
+
+export const ProductModel = mongoose.model('Product',ProductSchema)
