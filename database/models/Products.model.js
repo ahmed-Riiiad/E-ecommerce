@@ -69,7 +69,7 @@ import mongoose from "mongoose"
             required : [true,'product Brand required ']
         }
     }, {
-        timestamps: true,
+        timestamps: true, toJSON:{virtuals:true } , toObject:{virtuals:true }
     }
 )
 
@@ -79,9 +79,9 @@ ProductSchema.post('init',(doc)=>{
 })
 
 ProductSchema.virtual('myReview',{
+    ref : 'Review',
     localField:'_id',
-    foreignField:'productRouter',
-    ref : 'Review'
+    foreignField:'Product'
 })
 
 ProductSchema.pre('/^find/',function(){

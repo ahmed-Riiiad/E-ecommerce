@@ -1,6 +1,6 @@
 export class ApiFeature {
     constructor(mongooseQuery,reqQuery){
-        this.query = mongooseQuery;
+        this.mongooseQuery = mongooseQuery;
         this.reqQuery= reqQuery 
     }
 
@@ -25,14 +25,28 @@ filterByKeyword() {
   this.mongooseQuery.find(filtration)
   return this
 }
-sortBy(){
 
+sortBy(){
     if(this.reqQuery.sort){
         let sortedBy =  this.reqQuery.sort.split(',').join(' ')
         this.mongooseQuery.sort(sortedBy)
         }
         return this
 }
+
+Search(){
+  if(this.reqQuery.Keyword){
+    this.mongooseQuery.find({
+         $or:[
+          {Title:{$regex : this.reqQuery.Keyword ,$options:'i'}},
+          {Description:{$regex : this.reqQuery.Keyword ,$options:'i'}}
+         ]
+    })
+    }
+    return this
+
+}
+
 selectFields () {
     if(this.reqQuery.fields){
         let fieldedBy =  this.reqQuery.fields.split(',').join(' ')

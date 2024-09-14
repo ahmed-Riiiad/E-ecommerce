@@ -1,25 +1,30 @@
-process.on('uncaughtException',(err)=>{
-    console.log('errrrrrrrrr');
-})
+// process.on('uncaughtException',(err)=>{
+//     console.log('error');
+// })
 
-import  Express from 'express'
-import { dbconnection } from './database/dbconnection.js'
+import express from 'express';
 import * as dotenv from 'dotenv'
+dotenv.config()
+import { dbconnection } from './database/dbconnection.js'
 import { init } from './src/init.routes.js';
 import cors from 'cors'
-dotenv.config()
+import morgan from 'morgan';
 
 
-const app = Express()
+
+const app = express()
 const port = 3000
 app.use(cors())
-app.use(Express.json())
-app.use(Express.static('/UpLoads'))
-init (app) 
+app.use(express.json())
+// app.use(morgan('dev'))
+
+
+app.use(express.static('/UpLoads')) 
+init(app) 
 dbconnection ()
 app.listen(process.env.PORT || port , () => console.log(`O.K`))
 
 
 process.on('unhandledRejection',(err)=>{
-    console.log('eroooooooooooooooooooor',err)
+    console.log('error',err)
 })

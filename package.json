@@ -1,15 +1,14 @@
 {
   "name": "week-5",
   "version": "1.0.0",
-  "description": "",
   "main": "Server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node Server.js"
+    "start": "node Server.js"
   },
   "engines": {
-    "node": "18.16.1"
+    "node": "20.16.0"
   },
   "keywords": [],
   "author": "",
@@ -22,10 +21,13 @@
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.3.4",
+    "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.4",
     "qrcode": "^1.5.3",
     "slugify": "^1.6.6",
-    "stripe": "^13.2.0",
+    "stripe": "^16.9.0-beta.1",
     "uuid": "^9.0.0"
-  }
+  },
+  "description": ""
 }

@@ -6,7 +6,7 @@ export const userAuth = (req,res,next)=>{
         if (err) {
             res.json({msg:'token not defined',err})
         } else {
-            req.userId = token.userId
+            req.userId = decoded.userId
             next()
         }
     })

@@ -31,7 +31,7 @@ const getOneCoupon =catchError (async(req,res,next)=>{
 
   const UpdateCoupon =catchError (async(req,res,next)=>{
     const {id}= req.params 
-    let result =await CouponModel.findOneAndUpdate({user:req.user._id,_id:id}, req.body,{new:true})
+    let result =await CouponModel.findOneAndUpdate(id , req.body,{new:true})
     !result && next(new generateError('U are not authorize to update this Coupon',404))
     result && res.json({msg : 'success',result})
   })

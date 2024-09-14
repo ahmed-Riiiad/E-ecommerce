@@ -39,7 +39,7 @@ import mongoose from "mongoose"
         address : [{
             cityName   : String,
             street      : String,
-            phone    : Number,
+            phone    : String
         }]
     }, {
         timestamps: true,
@@ -50,7 +50,7 @@ user_schema.pre('save',function(){
     this.password = bcrypt.hashSync(this.password,7)
 })
 
-user_schema.pre(/^find/,function(){
+user_schema.pre('findOneAndUpdate',function(){
     if(this._update.password)
     this._update.password = bcrypt.hashSync(this._update.password,7)
 })

@@ -39,13 +39,14 @@ const getOneUser =catchError (async(req,res,next)=>{
 
   const changePass =catchError (async(req,res,next)=>{
     const {id}= req.params 
+    req.body.passwordChangeAT = Date.now()
     let result =await userModel.findByIdAndUpdate(id,req.body,{new:true})
     !result && next(new generateError('not found',404))
     result && res.json({msg : 'success',result})
   })
 
   const deleteUser =catchError (async(req,res,next)=>{
-    const {id}= req.params 
+    const {id}= req.params  
     let result =await userModel.findByIdAndDelete(id)
     !result && next(new generateError('not found',404))
     result && res.json({msg : 'success',result})

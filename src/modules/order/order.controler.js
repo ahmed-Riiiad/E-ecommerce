@@ -29,9 +29,12 @@ const createCashOrder =catchError (async(req,res,next)=>{
       
       }))
      await ProductModel.bulkWrite(Options)
+     await cartModel.findByIdAndDelete(req.params.id)
+     res.status(201).json({msg:success , order })
+     
+    }else{
+      return next(new generateError('not found',404))
     }
-
-await cartModel.findByIdAndDelete(req.params.id)
 })
 
 const getSpecifiedOrder =catchError (async(req,res,next)=>{
@@ -55,7 +58,7 @@ const createCardOrder =catchError (async(req,res,next)=>{
     line_items:[
       {price_data:{
         currency:'egp',
-        unit_amount:(ToTalOrderPrice*100),
+        unit_amount:ToTalOrderPrice * 100,
         product_data:{name:req.params.id}
       },
     quantity:1}
@@ -73,5 +76,5 @@ const createCardOrder =catchError (async(req,res,next)=>{
 })
   
   export{
-    createCashOrder,getSpecifiedOrder,getAllOrder
+    createCashOrder,getSpecifiedOrder,getAllOrder,createCardOrder
   }

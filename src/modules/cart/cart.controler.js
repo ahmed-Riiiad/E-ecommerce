@@ -3,12 +3,14 @@ import { catchError } from "../../utiles/catchError.js"
 import { cartModel } from "../../../database/models/cart.model.js"
 import { ProductModel } from "../../../database/models/Products.model.js"
 import { CouponModel } from "../../../database/models/Coupon.model.js";
+
+
  function calcTotalPrice (cart){
-  let ToTalPrice = 0;
+  let TotalPrice = 0;
   cart.items.forEach(element => {
-    ToTalPrice += element.quantity * element.price
+    TotalPrice += element.quantity * element.price
   });
-  cart.ToTalPrice = ToTalPrice
+  cart.ToTalPrice = TotalPrice
 }
 const addProductToCart =catchError (async(req,res,next)=>{
   let product =await ProductModel.findById(req.body.product)
@@ -43,7 +45,8 @@ const addProductToCart =catchError (async(req,res,next)=>{
 )
 
 const removeProductFromCart =catchError (async(req,res)=>{
-  let result =  await cartModel .findByIdAndUpdate(req.user._id,{$pull:{items : {_id:req.params.id}}},{new:true})
+  let result =  await cartModel
+  .findOneAndUpdate({user : req.user._id},{$pull:{items : {_id:req.params.id}}},{new:true})
 !result && next(new generateError('not found',404))
 calcTotalPrice (result)
 if(result.Discount){
@@ -73,12 +76,28 @@ if(isExistCart.Discount){
 
     let Coupon =await CouponModel.findOne({code:req.body.code,expires:{$gt:Date.now()}})
     let cart =await cartModel.findOne({user:req.body._id})
-    cart.ToTalPriceAfterDiscount = cart.ToTalPrice - (cart.ToTalPrice*Coupon.Discount)/100
+    cart.ToTalPriceAfterDiscount = cart.ToTalPrice - (cart.ToTalPrice * Coupon.Discount)/100
     cart.Discount = Coupon.Discount
     await cart.save()
      res.status(201).json({msg:success,cart})
   })
 
+  const GetCart =catchError (async(req,res)=>{
+
+    let cart =await cartModel.findOne({user:req.body._id}).populate(items.product)
+    
+     res.status(201).json({ msg:success, cart })
+  })
+
+  const ClearUserCart =catchError (async(req,res)=>{
+    const {id}= req.params 
+    let result =await cartModel.findByIdAndDelete(id)
+    !result && next(new generateError('not found',404))
+    result && res.json({msg : 'success',result})
+  })
+
+
   export{
-    removeProductFromCart,addProductToCart,updateQuantity, applyCoupon
+    ClearUserCart , removeProductFromCart,addProductToCart
+    ,updateQuantity, applyCoupon ,GetCart
   }

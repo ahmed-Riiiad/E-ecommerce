@@ -5,7 +5,7 @@ import slugify from "slugify"
 import { ApiFeature } from "../../utiles/apiFeatures.js"
 
 const createProduct =catchError (async(req,res)=>{
-    req.body.slug = slugify(req.body.name)
+    req.body.slug = slugify(req.body.Title)
     req.body.imgCover = req.files.imgCover[0].filename
     req.body.imgs = req.files.imgs.map(obj=>obj.filename)
   let mongooseQuery =  new ProductModel(req.body)
@@ -16,7 +16,7 @@ const createProduct =catchError (async(req,res)=>{
 const getAllProduct =catchError (async(req,res,next)=>{
 
 let apiFeature = new ApiFeature(ProductModel.find(),req.query).paginate()
-.selectFields().filterByKeyword().sortBy()
+.selectFields().filterByKeyword().sortBy().Search()
 // execute
   let result = await apiFeature.mongooseQuery
   res.json({msg : 'success',page : apiFeature.page ,result})
@@ -26,22 +26,22 @@ let apiFeature = new ApiFeature(ProductModel.find(),req.query).paginate()
 const getOneProduct =catchError (async(req,res,next)=>{
     const {id}= req.params 
     let result =await ProductModel.findById(id)
-    !result && next(new generateError('not found',404))
+    !result && next(new generateError('not found'),404)
     result && res.json({msg : 'success',result})
   })
 
   const UpdateProduct =catchError (async(req,res,next)=>{
     const {id}= req.params 
-    const {name} = req.body
-    let result =await ProductModel.findByIdAndUpdate(id,{ name,slug: slugify(name)},{new:true})
-    !result && next(new generateError('not found',404))
+   if (req.body.Title) req.body.slug = slugify(req.body.Title)
+    let result =await ProductModel.findByIdAndUpdate(id,req.body,{new:true})
+    !result && next(new generateError('not found'),404)
     result && res.json({msg : 'success',result})
   })
 
   const deleteProduct =catchError (async(req,res,next)=>{
     const {id}= req.params 
     let result =await ProductModel.findByIdAndDelete(id)
-    !result && next(new generateError('not found',404))
+    !result && next(new generateError('not found'),404)
     result && res.json({msg : 'success',result})
   })
 

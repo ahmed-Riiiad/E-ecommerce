@@ -4,12 +4,12 @@ import { allowedTo, protectedRoutes } from "../auth/auth.controler.js";
 const CouponRouter =  Express.Router();
 
 CouponRouter.route('/')
-    .get(protectedRoutes,allowedTo('admin','user'),getAllCoupon)
+    .get(getAllCoupon)
     .post(protectedRoutes,allowedTo('admin'),createCoupon)
 
 CouponRouter.route('/:id')
-    .get(protectedRoutes,allowedTo('user','admin'),getOneCoupon)
+    .get(getOneCoupon)
     .put(protectedRoutes,allowedTo('user'),UpdateCoupon)
-    .delete(protectedRoutes,allowedTo('user'),deleteCoupon)
+    .delete(protectedRoutes,allowedTo('user', 'admin'),deleteCoupon)
 
     export default CouponRouter;

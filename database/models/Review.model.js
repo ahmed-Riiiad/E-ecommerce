@@ -30,7 +30,7 @@ import Mongoose from "mongoose"
 
 
 ReviewSchema.pre(/^find/,function(){
-    this.populate('user','name')
+    this.populate('user','name -_id')
 })
 
 export const ReviewModel = Mongoose.model('Review',ReviewSchema)

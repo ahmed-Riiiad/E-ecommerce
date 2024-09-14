@@ -3,15 +3,18 @@ import { UpdateProduct, createProduct, deleteProduct, getAllProduct, getOneProdu
 import { validate } from "../../midellware/validaition.js";
 import { UpdateProductSchema, createProductSchema, deleteProductSchema, getProductSchema } from "./product.validation.js";
 import { upLoadFiles } from "../../midellware/uploadFile.js";
+import { allowedTo, protectedRoutes } from "../auth/auth.controler.js";
 
 const productRouter =  Express.Router();
 let arrayOfFields = [{name : 'imgCover',maxCount: 1},{name :'imgs', maxCount:20}]
+
+
 productRouter.route('/')
 .get(getAllProduct)
-.post(upLoadFiles('product',arrayOfFields),validate(createProductSchema),createProduct)
+.post(protectedRoutes,allowedTo('admin','user'),upLoadFiles('product',arrayOfFields),validate(createProductSchema),createProduct)
 
 productRouter.route('/:id')
 .get(validate(getProductSchema),getOneProduct)
-.put(validate(UpdateProductSchema),UpdateProduct)
-.delete(validate(deleteProductSchema),deleteProduct)
+.put(protectedRoutes,allowedTo('admin') , validate(UpdateProductSchema),UpdateProduct)
+.delete( protectedRoutes,allowedTo('admin'), validate(deleteProductSchema),deleteProduct)
 export default productRouter;

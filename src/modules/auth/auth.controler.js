@@ -20,13 +20,14 @@ export const signIN = catchError((req,res,next)=>{
     let user =  userModel.findOne({email})
     const match =  bcrypt.compare(password,user.password)
     if(user && match ){
-     let token = jwt.sign({name:user.name,email:user.email,user_id:user._id,role : user.role},'aaaaaaaaaa')
+     let token = jwt.sign({name:user.name,email:user.email,user_id:user._id,role : user.role},
+        'aaaaaaaaaa')
      return res.json({message:success,token})
     }
     return next(new generateError('"email not found"',409))
 })
 
-
+//authentication
 export const protectedRoutes = catchError(async (req,res,next)=>{
     let {token} = req.headers
     if(!token) return next(new generateError('where is token !',401))
@@ -34,14 +35,18 @@ export const protectedRoutes = catchError(async (req,res,next)=>{
     let user = await userModel.findById(decoded.user_id)
     if (!user) return next(new generateError('where is user !',401))
     let passwordChangeAT = parseInt(user.passwordChangeAT.getTime()/1000)
-    if (passwordChangeAT>decoded.iat)  return next(new generateError('inValid token !',401))
+    if (passwordChangeAT > decoded.iat ) 
+     return next(new generateError('inValid token !',401))
     req.user = user 
 next()
 })
 
+
+//authorization
 export const allowedTo = (...roles)=>{
     return catchError(async(req,res,next)=>{
-        if(!roles.includes(req.user.role)) return next( new generateError('cannot authorize'))
+        if(!roles.includes(req.user.role)) 
+        return next( new generateError(`cannot authorize , You Are ${req.user.role}` , 401  ))
         next()
     })
 }
