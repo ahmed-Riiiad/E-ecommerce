@@ -1,6 +1,7 @@
 import  Jwt from "jsonwebtoken";
 
- export const GenerateToken = (payload)=>{
-   let token =  Jwt.sign(payload,'tokenPass')
-   return token
-}
+ export const GenerateSignToken = payload =>{
+  return token =  Jwt.sign(payload,process.env.tokenPass , 
+    {expiresIn : process.env.tokenExpire} 
+    )}
+

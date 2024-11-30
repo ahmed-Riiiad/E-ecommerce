@@ -5,14 +5,14 @@ import Mongoose from "mongoose"
     {
         name:{
             type:String,
-            require:true,
+            required:true,
             unique : [true,'SubCategory already exist']  ,
             trim:[true],
             minlength:[2]
         },
      slug:{
         type: String,
-        require:true,
+        required:true,
         lowercase:true
         
      },
@@ -25,4 +25,5 @@ import Mongoose from "mongoose"
         timestamps: true,
     }
 )
+
 export const SubCategoryModel = Mongoose.model('SubCategory',SubCategorySchema)

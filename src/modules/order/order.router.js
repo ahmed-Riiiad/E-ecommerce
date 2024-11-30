@@ -14,7 +14,7 @@ orderRouter.route('/')
 orderRouter.route('/all')
 .get(protectedRoutes,allowedTo('admin'),getAllOrder)
 
-orderRouter.route('/checkOut')
+orderRouter.route('/checkOut/:id')
 .get(protectedRoutes,allowedTo('user'),createCardOrder)
 
 export default orderRouter;

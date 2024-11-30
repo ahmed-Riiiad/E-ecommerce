@@ -11,7 +11,7 @@ import mongoose from "mongoose"
         },
         Discount:{
         type: Number,
-        require:true ,
+        required:true ,
         min : 0
      },
      expires:{

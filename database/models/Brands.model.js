@@ -4,14 +4,14 @@ const BrandSchema = Mongoose.Schema(
     {
         name:{
             type:String,
-            require:true,
+            required:true,
             unique : [true,'Brand already exist']  ,
             trim:[true],
             minlength:[2]
         },
         slug:{
             type: String,
-            require:true,
+            required:true,
             lowercase:true
             
         },

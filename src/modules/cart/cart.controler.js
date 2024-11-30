@@ -3,6 +3,7 @@ import { catchError } from "../../utiles/catchError.js"
 import { cartModel } from "../../../database/models/cart.model.js"
 import { ProductModel } from "../../../database/models/Products.model.js"
 import { CouponModel } from "../../../database/models/Coupon.model.js";
+import {  deleteOne } from "../../utiles/handlerFactory.js";
 
 
  function calcTotalPrice (cart){
@@ -89,13 +90,7 @@ if(isExistCart.Discount){
      res.status(201).json({ msg:success, cart })
   })
 
-  const ClearUserCart =catchError (async(req,res)=>{
-    const {id}= req.params 
-    let result =await cartModel.findByIdAndDelete(id)
-    !result && next(new generateError('not found',404))
-    result && res.json({msg : 'success',result})
-  })
-
+  const ClearUserCart =deleteOne(cartModel)
 
   export{
     ClearUserCart , removeProductFromCart,addProductToCart

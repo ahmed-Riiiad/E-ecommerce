@@ -2,7 +2,6 @@ import BrandRouter from "./modules/Brands/brand.router.js"
 import reviewRouter from "./modules/Review/Review.router.js"
 import SubcategoryRouter from "./modules/SubCatogry/SubCategory.router.js"
 import addressRouter from "./modules/address/address.router.js"
-import AuthRouter from "./modules/auth/auth.router.js"
 import cartRouter from "./modules/cart/cart.router.js"
 import categoryRouter from "./modules/category/category.router.js"
 import CouponRouter from "./modules/coupon/coupon.router.js"
@@ -15,12 +14,11 @@ import { globalError } from "./utiles/globalErrorMidillware.js"
 
 
 export function init(app) {
-    app.use('/Api/v1/categories',categoryRouter)
+app.use('/Api/v1/categories',categoryRouter)
 app.use('/Api/v1/subcategories',SubcategoryRouter)
 app.use('/Api/v1/Brands',BrandRouter)
 app.use('/Api/v1/products',productRouter)
 app.use('/Api/v1/users',userRouter)
-app.use('/Api/v1/auth',AuthRouter)
 app.use('/Api/v1/reviews',reviewRouter)
 app.use('/Api/v1/wishLists',wishListRouter)
 app.use('/Api/v1/address',addressRouter)

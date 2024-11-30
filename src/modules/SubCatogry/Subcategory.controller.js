@@ -2,6 +2,7 @@ import { SubCategoryModel } from "../../../database/models/SubCategory.model.js"
 import { generateError } from "../../utiles/generateError.js"
 import { catchError } from "../../utiles/catchError.js"
 import slugify from "slugify"
+import { deleteOne, getOne } from "../../utiles/handlerFactory.js"
 
 const createSubCategory =catchError (async(req,res)=>{
     const {name,category} = req.body
@@ -20,28 +21,17 @@ const getAllSubCategory =catchError (async(req,res,next)=>{
 })
 
 
-const getOneSubCategory =catchError (async(req,res,next)=>{
-    const {id}= req.params 
-    let result =await SubCategoryModel.findById(id)
-    !result && next(new generateError('not found',404))
-    result && res.json({msg : 'success',result})
-  })
 
-  const UpdateSubCategory =catchError (async(req,res,next)=>{
-    const {id}= req.params 
-    const {name,category} = req.body
-    let result =await SubCategoryModel.findByIdAndUpdate(id,{ name,category,slug: slugify(name)},{new:true})
-    !result && next(new generateError('not found',404))
-    result && res.json({msg : 'success',result})
-  })
+const UpdateSubCategory =catchError (async(req,res,next)=>{
+  const {id}= req.params 
+  const {name,category} = req.body
+  let result =await SubCategoryModel.findByIdAndUpdate(id,{ name,category,slug: slugify(name)},{new:true})
+  !result && next(new generateError('not found',404))
+  result && res.json({msg : 'success',result})
+})
 
-  const deleteSubCategory =catchError (async(req,res,next)=>{
-    const {id}= req.params 
-    let result =await SubCategoryModel.findByIdAndDelete(id)
-    !result && next(new generateError('not found',404))
-    result && res.json({msg : 'success',result})
-  })
-
-  export{
-    createSubCategory,getAllSubCategory,getOneSubCategory,UpdateSubCategory,deleteSubCategory
+const getOneSubCategory =getOne(SubCategoryModel)
+const deleteSubCategory =deleteOne(SubCategoryModel)
+export {
+  createSubCategory,getAllSubCategory,getOneSubCategory,UpdateSubCategory,deleteSubCategory
   }

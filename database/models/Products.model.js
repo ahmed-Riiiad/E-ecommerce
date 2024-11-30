@@ -5,20 +5,20 @@ import mongoose from "mongoose"
     {
         Title:{
             type:String,
-            require:true,
+            required:true,
             unique : [true,'Product already exist']  ,
             trim:[true],
             minlength:[2]
         },
      slug:{
         type: String,
-        require:true,
+        required:true,
         lowercase:true
         
      },
         Price:{
             type:Number,
-            require:true,
+            required:true,
             min : 0 
         },
         PriceAfterDisc:{

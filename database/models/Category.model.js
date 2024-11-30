@@ -5,14 +5,14 @@ import Mongoose from "mongoose"
     {
         name:{
             type:String,
-            require:true,
+            required:true,
             unique : [true,'category already exist']  ,
             trim:[true],
             minlength:[2]
         },
      slug:{
         type: String,
-        require:true,
+        required:true,
         lowercase:true
         
      },

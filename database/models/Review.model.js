@@ -5,7 +5,7 @@ import Mongoose from "mongoose"
     {
         Comment:{
             type:String,
-            require:true ,
+            required:true ,
             trim:[true],
             minlength:[2]
         },
