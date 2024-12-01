@@ -1,0 +1,18 @@
+{
+    "id": "we_1QQrDgCEumfOCBvQD86bgezy",
+    "object": "webhook_endpoint",
+    "api_version": null,
+    "application": null,
+    "created": 1732975224,
+    "description": null,
+    "enabled_events": [
+      "checkout.session.completed"
+    ],
+    "livemode": false,
+    "metadata": {
+    },
+    "secret": "whsec_tL**************************Jqs0",
+    "status": "enabled",
+    "url": "https://e-ecommerce-psi.vercel.app/Api/v1/webhook"
+  }
+ 

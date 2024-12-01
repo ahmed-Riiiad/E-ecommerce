@@ -3,12 +3,14 @@ import { catchError } from "../../utiles/catchError.js"
 import { cartModel } from "../../../database/models/cart.model.js"
 import { orderModel } from "../../../database/models/order.model .js";
 import { ProductModel } from "../../../database/models/Products.model.js";
+
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.stripeSecretKey);
 
 
 const createCashOrder =catchError (async(req,res,next)=>{
     const cart = await cartModel.findById(req.params.id)
+    if (!cart) return next(new generateError('not found',404))
     const ToTalOrderPrice = cart.ToTalPriceAfterDiscount ?
     cart.ToTalPriceAfterDiscount:cart.ToTalPrice
     const order = new orderModel({
@@ -77,7 +79,7 @@ const createCardOrder =catchError (async(req,res,next)=>{
 
 const createOnlineOrder =catchError(async(request, response) => {
   const sig = request.headers['stripe-signature'].toString();
-
+  card()
   let event;
 
   try {
@@ -97,6 +99,39 @@ const createOnlineOrder =catchError(async(request, response) => {
     
   }
 })
+
+async function card(e){
+  const cart = await cartModel.findById(e.client_reference_id)
+  if (!cart) return next(new generateError('not found',404))
+  // let user = await userModel 
+  const order = new orderModel({
+    user : user._id ,
+    total_price : e.unit_amount/100 ,
+    shippingAddress : e.metadata.shippingAddress,
+    items : cart.items,
+    paymentMethod : 'card',
+    isPaid : true ,
+    paidAt : Date.now()
+  })
+  await order.save()
+
+  if(order){
+    let Options = cart.items.map(item=>({
+      updateOne: {
+        filter:{ _id: item.product },
+        update  :{ $inc:{quantity:-item.quantity,sold:item.quantity} }}
+      
+    
+    }))
+   await ProductModel.bulkWrite(Options)
+   await cartModel.findByIdAndDelete(req.params.id)
+   res.status(201).json({msg:success , order })
+   
+  }else{
+    return next(new generateError('not found',404))
+  }
+
+}
   
   export{
     createCashOrder,getSpecifiedOrder,getAllOrder,createCardOrder,createOnlineOrder
