@@ -4,7 +4,7 @@ process.on('uncaughtException',(err)=>{
 import express from 'express';
 import * as dotenv from 'dotenv'
 dotenv.config()
-import { dbconnection } from './database/dbconnection.js'
+import { DataBase } from './database/dbconnection.js'
 import { init } from './src/init.routes.js';
 import cors from 'cors'
 import morgan from 'morgan';
@@ -17,7 +17,7 @@ import { createOnlineOrder } from './src/modules/order/order.controler.js';
 const app = express()
 app.post('/webhook', express.raw({type: 'application/json'}),createOnlineOrder);
   
-  app.listen(4242, () => console.log('Running on port 4242'));
+  app.listen(4242, () => console.log('Running on server port 4242'));
 //Global MiddleWare
 // 1- security http headers
     app.use(helmet())
@@ -51,8 +51,8 @@ init(app)
 
 // DataBase Connection
 const port = 3000
-dbconnection()
-app.listen(process.env.PORT || port , () => console.log(`O.K`))
+DataBase()
+app.listen(process.env.PORT || port , () => console.log(`server is Running on local port ${port} `))
 
 // unhandledRejection error 
 process.on('unhandledRejection',(err)=>{

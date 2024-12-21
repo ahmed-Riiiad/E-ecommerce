@@ -1,14 +1,29 @@
 import { CouponModel } from "../../../database/models/Coupon.model.js"
 import { generateError } from "../../utiles/generateError.js"
-import { ApiFeature } from "../../utiles/apiFeatures.js"
 import { catchError } from "../../utiles/catchError.js"
 import QRCode  from "qrcode"
 import { UpdateModel,  deleteOne, getAll } from "../../utiles/handlerFactory.js"
 
 const createCoupon=catchError (async(req,res)=>{
-  let result =  new CouponModel(req.body)
-  await result.save()
-  res.json({ msg : 'success', result })
+  const { code, Discount, expires } = req.body;
+  if (!code || !Discount || !expires) {
+    return next(new generateError('Missing required fields', 400));
+  }
+  const existingCoupon = await CouponModel.findOne({ code });
+  if (existingCoupon) {
+    return next(new generateError('Coupon code already exists', 400));
+  }
+  const newCoupon = new CouponModel({
+    code,
+    Discount,
+    expires,
+  });
+  await newCoupon.save();
+  res.status(201).json({
+    status: 'success',
+    message: 'Coupon created successfully',
+    coupon: newCoupon,
+  });
 })
 
 const getOneCoupon =catchError (async(req,res,next)=>{

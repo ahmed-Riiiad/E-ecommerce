@@ -6,44 +6,68 @@ import { CouponModel } from "../../../database/models/Coupon.model.js";
 import {  deleteOne } from "../../utiles/handlerFactory.js";
 
 
- function calcTotalPrice (cart){
-  let TotalPrice = 0;
-  cart.items.forEach(element => {
-    TotalPrice += element.quantity * element.price
+function calcTotalPrice(cart) {
+  let totalPrice = 0;
+  cart.items.forEach((element) => {
+    totalPrice += (element.quantity || 0) * (element.price || 0);  
   });
-  cart.ToTalPrice = TotalPrice
+  cart.ToTalPrice = totalPrice;
 }
-const addProductToCart =catchError (async(req,res,next)=>{
-  let product =await ProductModel.findById(req.body.product)
-  if(!product){return next(new generateError('product not found'))}
-  req.body.price = product.price
-  let isExistCart = await cartModel.findOne({user : req.user._id})
-  if(!isExistCart){
-    let cart =  new cartModel({
-      user : req.user._id,
-      items : [req.body]
-    })
-    calcTotalPrice (cart)
-    await result.save()
-    res.json({ msg : 'success', cart })
+
+const addProductToCart = catchError(async (req, res, next) => {
+  let product = await ProductModel.findById(req.body.product);
+  if (!product) {
+    return next(new generateError('Product not found'));
+  }
+  req.body.price = product.Price;
+  let isExistCart = await cartModel.findOne({ user: req.user._id });
+  if (!isExistCart) {
+    let cart = new cartModel({
+      user: req.user._id,
+      items: [req.body],
+      ToTalPrice:0,  // Initialize ToTalPrice
+      ToTalPriceAfterDiscount: 0, // Initialize ToTalPriceAfterDiscount
+       Discount: 0, // Assuming no discount initially
+    });
+    calcTotalPrice(cart);
+    await cart.save();
+    cart = await cart.populate({
+      path: 'user',   
+      select: 'name', 
+  })
+    return res.json({ msg: 'Success', cart });
+  }
+  let item = isExistCart.items.find((elm) => elm.product.toString() === req.body.product);
+  if (item) {
+    // If product exists, increase the quantity and adjust the price accordingly
+    item.quantity += 1;
+    item.price = (item.quantity * product.Price || 1) ; // Update price based on new quantity
+  } else {
+    // Otherwise, add the new product to the cart
+    req.body.price = product.Price;
+    isExistCart.items.push(req.body);
   }
 
-  let item = isExistCart.items.find((elm)=>elm.product==req.body.product)
-  if (item){
-    item.quantity += 1
-  }else{
-    isExistCart.items.push(req.body)
-  }
-  
-  calcTotalPrice (isExistCart)
-  if(isExistCart.Discount){
-  isExistCart.ToTalPriceAfterDiscount = isExistCart.ToTalPrice - (isExistCart.ToTalPrice*isExistCart.Discount)/100
+  // Recalculate the total price of the cart
+  calcTotalPrice(isExistCart);
+
+  // If a discount exists, apply it to the total price
+  if (isExistCart.Discount) {
+    isExistCart.ToTalPriceAfterDiscount =
+      isExistCart.ToTalPrice - (isExistCart.ToTalPrice * isExistCart.Discount) / 100;
   }
 
-  await isExistCart.save()
-  res.json({msg : 'success', cart : isExistCart })
-  }
-)
+  // Save the updated cart
+  await isExistCart.save();
+
+  // Populate the user field and return the updated cart
+  isExistCart = await isExistCart.populate({
+    path: 'user',   
+    select: 'name', 
+})
+  return res.json({ status: 'Success', cart: isExistCart });
+});
+
 
 const removeProductFromCart =catchError (async(req,res)=>{
   let result =  await cartModel
@@ -73,21 +97,26 @@ if(isExistCart.Discount){
     })
    
 
-  const applyCoupon =catchError (async(req,res)=>{
-
-    let Coupon =await CouponModel.findOne({code:req.body.code,expires:{$gt:Date.now()}})
-    let cart =await cartModel.findOne({user:req.body._id})
-    cart.ToTalPriceAfterDiscount = cart.ToTalPrice - (cart.ToTalPrice * Coupon.Discount)/100
-    cart.Discount = Coupon.Discount
-    await cart.save()
-     res.status(201).json({msg:success,cart})
-  })
+const applyCoupon = catchError(async (req, res) => {
+      let Coupon = await CouponModel.findOne({ code: req.body.code, expires: { $gt: Date.now() } });
+      let cart = await cartModel.findOne({ user:req.user._id });
+      if (!Coupon) {
+        return res.status(400).json({ msg: 'Coupon is invalid or expired' });
+      }
+      if (!cart) {
+        return res.status(400).json({ msg: 'Cart not found for this user' });
+      }
+      cart.ToTalPriceAfterDiscount = cart.ToTalPrice - (cart.ToTalPrice * Coupon.Discount) / 100;
+      cart.Discount = Coupon.Discount;
+      await cart.save();
+      res.status(201).json({ status: 'Success', cart });
+    });
+    
 
   const GetCart =catchError (async(req,res)=>{
-
-    let cart =await cartModel.findOne({user:req.body._id}).populate(items.product)
-    
-     res.status(201).json({ msg:success, cart })
+    // const {id}= req.params 
+    let cart =await cartModel.findOne({user : req.user._id})
+     res.status(201).json({ msg:'success', cart })
   })
 
   const ClearUserCart =deleteOne(cartModel)

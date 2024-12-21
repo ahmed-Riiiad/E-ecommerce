@@ -1,20 +1,20 @@
 import Express  from "express";
-import { createCardOrder, createCashOrder, getAllOrder, getSpecifiedOrder } 
+import { createSessionOrder, createCashOrder, getAllOrder, getSpecifiedOrder } 
 from "./order.controler.js";
 import { allowedTo, protectedRoutes } from "../auth/auth.controler.js";
 
 const orderRouter =  Express.Router();
 
 orderRouter.route('/:id')
-    .post(protectedRoutes,allowedTo('user'),createCashOrder)
+    .post(protectedRoutes,allowedTo('admin'),createCashOrder)
 
 orderRouter.route('/')
-     .get(protectedRoutes,allowedTo('user'),getSpecifiedOrder)
+     .get(protectedRoutes,allowedTo('admin'),getSpecifiedOrder)
 
 orderRouter.route('/all')
 .get(protectedRoutes,allowedTo('admin'),getAllOrder)
 
 orderRouter.route('/checkOut/:id')
-.get(protectedRoutes,allowedTo('user'),createCardOrder)
+.post(protectedRoutes,allowedTo('user'),createSessionOrder)
 
 export default orderRouter;

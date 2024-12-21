@@ -26,4 +26,5 @@ import Mongoose from "mongoose"
     }
 )
 
+
 export const SubCategoryModel = Mongoose.model('SubCategory',SubCategorySchema)

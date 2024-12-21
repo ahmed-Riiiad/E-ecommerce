@@ -1,7 +1,7 @@
-export function catchError(fn){
-    return (req,res,next)=>{
-        fn(req,res,next).catch((err)=>{
-            next(err)
-        })
-    }
+export function catchError(fn) {
+    return (req, res, next) => {
+        fn(req, res, next).catch((err) => {
+            next(err);  // Pass the error to the global error handler
+        });
+    };
 }

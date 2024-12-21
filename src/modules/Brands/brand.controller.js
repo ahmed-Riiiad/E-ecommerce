@@ -6,7 +6,11 @@ import { deleteOne, getAll, getOne } from "../../utiles/handlerFactory.js"
 
 const createBrand =catchError  (async(req,res)=>{
     req.body.slug = slugify(req.body.name)
-    req.body.logo = req.file.filename
+    if(req.file){
+      req.body.logo = req.file.filename
+      console.log(req.file)
+    }
+  
   let result =  BrandModel(req.body)
   await result.save()
   res.json({msg : 'success',result})

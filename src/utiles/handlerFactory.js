@@ -9,9 +9,9 @@ export const deleteOne = model => catchError (async(req,res,next)=>{
     !result && next(new generateError('doc not found',404))
     result && res.json({msg : 'success',  result : null })
   })
-export  const UpdateModel = Model =>catchError (async(req,res,next)=>{
+  export  const UpdateModel = Model =>catchError (async(req,res,next)=>{
     const {id}= req.params 
-    let result =await Model.findOneAndUpdate(id , req.body,{new:true})
+    let result =await Model.findByIdAndUpdate(id , req.body,{new:true})
     !result && next(new generateError('U are not authorize to update this doc', 404))
     result && res.json({msg : 'success',result})
   })
@@ -20,7 +20,14 @@ export  const UpdateModel = Model =>catchError (async(req,res,next)=>{
 
 export const getOne = Model => catchError (async(req,res,next)=>{
     const {id}= req.params 
+   
+    console.log(req.file)
+
     let result =await Model.findById(id)
+    if(req.file){
+      result.photo= req.file.originalname
+    }
+    result.photo= req.file.originalname
     !result && next(new generateError('doc not found' ,404))
     result && res.json({msg : 'success', result})
   })

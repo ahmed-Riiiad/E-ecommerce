@@ -55,12 +55,12 @@ import mongoose from "mongoose"
         imgs: [String],
         category :{
             type:mongoose.Types.ObjectId,
-            ref : 'category',
+            ref : 'Category',
             required : [true,'product category required ']
         },
-        Subcategory :{
+        SubCategory :{
             type:mongoose.Types.ObjectId,
-            ref : 'Subcategory',
+            ref : 'SubCategory',
             required : [true,'product Subcategory required ']
         },
         Brand :{
@@ -73,7 +73,8 @@ import mongoose from "mongoose"
     }
 )
 
-ProductSchema.post('init',(doc)=>{
+ProductSchema.post('save',(doc)=>{
+    console.log(doc)
     doc.imgCover= process.env.Base_Url +"/product/"+ doc.imgCover
     doc.imgs = doc.imgs.map((path=>process.env.Base_Url +"/product/"+ path))
 })
@@ -81,7 +82,7 @@ ProductSchema.post('init',(doc)=>{
 ProductSchema.virtual('myReview',{
     ref : 'Review',
     localField:'_id',
-    foreignField:'Product'
+    foreignField:'product'
 })
 
 ProductSchema.pre('/^find/',function(){

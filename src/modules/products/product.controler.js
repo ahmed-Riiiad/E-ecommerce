@@ -3,14 +3,64 @@ import  {ProductModel} from "../../../database/models/Products.model.js"
 import slugify from "slugify"
 import {  deleteOne, getAll, getOne } from "../../utiles/handlerFactory.js"
 
-const createProduct =catchError (async(req,res)=>{
-    req.body.slug = slugify(req.body.Title)
-    req.body.imgCover = req.files.imgCover[0].filename
-    req.body.imgs = req.files.imgs.map(obj=>obj.filename)
-  let mongooseQuery =  new ProductModel(req.body)
-  await  mongooseQuery.save()
-  res.json({msg : 'success',mongooseQuery})
+// const createProduct = catchError(async (req, res) => {
+//   if (!req.files || !req.files.imgCover || !req.files.imgs) {
+//       return res.status(400).json({ msg: "Please upload image files" });
+//   }
+//   req.body.slug = slugify(req.body.Title);
+//   req.body.imgCover = req.files.imgCover[0].filename;
+//   req.body.imgs = req.files.imgs.map(file => file.filename);
+//   console.log(req.files)
+
+//   const newProduct = new ProductModel(req.body);
+//   await newProduct.save();
+
+//   // Return the created product as a response
+//   res.status(201).json({
+//       msg: 'Product created successfully',
+//       product: newProduct
+//   });
+// });
+
+const createProduct = catchError(async (req, res) => {
+  if (!req.body.Title || typeof req.body.Title !== 'string') {
+      return res.status(400).json({ msg: "Title is required and must be a string" });
+  }
+  req.body.slug = slugify(req.body.Title, { lower: true });
+  if (!req.files || !req.files.imgCover) {
+      return res.status(400).json({ msg: "Please upload the main image (imgCover)" });
+  }
+  req.body.imgCover = req.files.imgCover[0].filename;
+  if (!req.files.imgs) {
+      return res.status(400).json({ msg: "Please upload images (imgs)" });
+  }
+  req.body.imgs = req.files.imgs.map(file => file.filename);
+  const newProduct = new ProductModel(req.body);
+  await newProduct.save();
+
+  const populatedProduct = await ProductModel.findById(newProduct._id)
+    .populate({
+      path: 'category',   
+      select: 'name', 
+  }) 
+  .populate({
+    path: 'SubCategory',   
+    select: 'name', 
 })
+    .populate({
+      path: 'Brand',   
+      select: 'name', 
+  }); 
+
+  // Return the created and populated product as a response
+  res.status(201).json({
+      msg: 'Product created successfully',
+      product: populatedProduct
+  });
+});
+;
+
+
 
 
 const UpdateProduct =catchError (async(req,res,next)=>{

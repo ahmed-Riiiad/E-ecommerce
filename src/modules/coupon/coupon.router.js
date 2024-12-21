@@ -5,7 +5,7 @@ const CouponRouter =  Express.Router();
 
 CouponRouter.route('/')
     .get(getAllCoupon)
-    .post(protectedRoutes,allowedTo('admin'),createCoupon)
+    .post(protectedRoutes,allowedTo('user', 'admin'),createCoupon)
 
 CouponRouter.route('/:id')
     .get(getOneCoupon)

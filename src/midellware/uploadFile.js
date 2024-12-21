@@ -6,7 +6,7 @@ import { generateError } from "../utiles/generateError.js";
 export const Options = (folderName)=>{
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-          cb(null, `/UpLoads/${folderName}`)
+          cb(null, `UpLoads/${folderName}`)
         },
         filename: function (req, file, cb) {
         cb(null,  uuidv4() + '-' + file.originalname )

@@ -10,5 +10,5 @@ SubcategoryRouter.route('/')
 SubcategoryRouter.route('/:id')
 .get(getOneSubCategory)
 .put(protectedRoutes,allowedTo('admin') ,UpdateSubCategory)
-.delete(protectedRoutes,allowedTo('admin') ,deleteSubCategory)
+.delete(protectedRoutes,allowedTo('user') ,deleteSubCategory)
 export default SubcategoryRouter;

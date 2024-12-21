@@ -5,7 +5,7 @@ const wishListRouter =  Express.Router();
 
 wishListRouter
     .route('/')
-    .patch(protectedRoutes,allowedTo('user'),addToWishList)
-    .delete(protectedRoutes,allowedTo('user'),removeFromWishList)
-    .get(protectedRoutes,allowedTo('user'),getAllUserWishList)
+    .patch(protectedRoutes,allowedTo('user','admin'),addToWishList)
+    .delete(protectedRoutes,allowedTo('user','admin'),removeFromWishList)
+    .get(protectedRoutes,allowedTo('user','admin'),getAllUserWishList)
 export default wishListRouter;

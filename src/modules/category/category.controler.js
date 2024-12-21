@@ -6,7 +6,9 @@ import { deleteOne, getAll, getOne } from "../../utiles/handlerFactory.js"
 
 const createCategory =catchError (async(req,res)=>{
   req.body.slug= slugify( req.body.name)
-  req.body.imgs = req.file.filename 
+  if (req.file){
+    req.body.imgs = req.file.filename 
+  }
   let result =  new CategoryModel(req.body)
   await result.save()
   res.json({msg : 'success',result})
