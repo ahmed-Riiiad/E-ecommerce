@@ -5,16 +5,15 @@ import { allowedTo, protectedRoutes } from "../auth/auth.controler.js";
 const cartRouter =  Express.Router();
 
 cartRouter.route('/')
-    .get(protectedRoutes,allowedTo('user','admin'),GetCart)
+    .get(protectedRoutes,allowedTo('user'),GetCart)
     .post(protectedRoutes,allowedTo('user'),addProductToCart)
 cartRouter.route('/remove/:id')
-    .delete(protectedRoutes,allowedTo('user','admin'),removeProductFromCart)
+    .delete(protectedRoutes,allowedTo('user'),removeProductFromCart)
     
 cartRouter.route('/:id')
-    .delete(protectedRoutes,allowedTo('user','admin'),ClearUserCart)
-    // .get(protectedRoutes,allowedTo('user','admin'),GetCart)
-    .put(protectedRoutes,allowedTo('user','admin'),updateQuantity)
+    .delete(protectedRoutes,allowedTo('user'),ClearUserCart)
+    .put(protectedRoutes,allowedTo('user'),updateQuantity)
     
-cartRouter.post('/applyCoupon',protectedRoutes,allowedTo('user','admin'),applyCoupon)
+cartRouter.post('/applyCoupon',protectedRoutes,allowedTo('user'),applyCoupon)
 
 export default cartRouter;

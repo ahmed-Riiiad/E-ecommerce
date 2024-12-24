@@ -30,7 +30,7 @@ let result =  await userModel.findByIdAndUpdate(req.user._id,{$pull:{wishList : 
   result && res.json({msg : 'success', result:result.wishList})
 })
 
-const getAllUserWishList =catchError (async(req,res)=>{
+const getUserWishList =catchError (async(req,res)=>{
 let result =  await userModel.findOne({_id : req.user._id}).populate({
   path: 'wishList',   
   select: 'name', 
@@ -41,5 +41,5 @@ let result =  await userModel.findOne({_id : req.user._id}).populate({
 
 
   export{
-    addToWishList,removeFromWishList,getAllUserWishList
+    addToWishList,removeFromWishList,getUserWishList
   }

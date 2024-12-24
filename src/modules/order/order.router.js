@@ -6,10 +6,10 @@ import { allowedTo, protectedRoutes } from "../auth/auth.controler.js";
 const orderRouter =  Express.Router();
 
 orderRouter.route('/:id')
-    .post(protectedRoutes,allowedTo('admin'),createCashOrder)
+    .post(protectedRoutes,allowedTo('user'),createCashOrder)
 
 orderRouter.route('/')
-     .get(protectedRoutes,allowedTo('admin'),getSpecifiedOrder)
+     .get(protectedRoutes,allowedTo('user'),getSpecifiedOrder)
 
 orderRouter.route('/all')
 .get(protectedRoutes,allowedTo('admin'),getAllOrder)

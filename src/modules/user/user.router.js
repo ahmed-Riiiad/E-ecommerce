@@ -7,25 +7,27 @@ import { upLoadFile } from "../../midellware/uploadFile.js";
 
 
 const userRouter =  Express.Router();
+
+// user
 userRouter.use('/:userId/subcategories', userRouter)
 userRouter.patch('/updateMyPassword', protectedRoutes,GetMe, updateMyPassword)
 userRouter.patch('/updateMe', protectedRoutes, GetMe, UpdateME);
 userRouter.delete('/UnActive',protectedRoutes,GetMe,UnActiveMe)
 userRouter.get('/me', protectedRoutes,upLoadFile('users','photo') , GetMe , getOneUser )
-userRouter.patch('/changeUserPass/:id', changeUserPass);
+userRouter.patch('/changeUserPass/:id', protectedRoutes, allowedTo('admin'), changeUserPass);
 
 
 
-// user
+
 userRouter.route('/')
-    .get(protectedRoutes,allowedTo('user'),getAllUser)
-    .post(protectedRoutes,allowedTo('user'),createUser)
-    .delete(protectedRoutes,allowedTo('user'),UnActiveMe)
+    .get(protectedRoutes,allowedTo('admin'),getAllUser)
+    .post(protectedRoutes,allowedTo('admin'),createUser)
+    .delete(protectedRoutes,GetMe,UnActiveMe)
 
 userRouter. 
         route('/:id')
-        .get(protectedRoutes,allowedTo('user'),getOneUser)
-        .delete(protectedRoutes,allowedTo('user'),deleteUser)
+        .get(protectedRoutes,allowedTo('admin'),getOneUser)
+        .delete(protectedRoutes,allowedTo('admin','user'),deleteUser)
         .patch(protectedRoutes,allowedTo('admin'),UpdateUser)
 
 

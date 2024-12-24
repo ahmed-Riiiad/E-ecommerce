@@ -11,8 +11,8 @@ let arrayOfFields = [{name : 'imgCover',maxCount: 1},{name :'imgs', maxCount:20}
 
 
 productRouter.route('/')
-.get(getAllProduct)
-.post(protectedRoutes,allowedTo('admin','user'),upLoadFiles('product',arrayOfFields),createProduct)
+.get(protectedRoutes,allowedTo('admin'),getAllProduct)
+.post(protectedRoutes,allowedTo('admin'),upLoadFiles('product',arrayOfFields),createProduct)
 
 productRouter.route('/:id')
 .get(protectedRoutes,allowedTo('user' ,'admin') ,getOneProduct)
