@@ -16,18 +16,14 @@ const createCashOrder = catchError(async (req, res, next) => {
   // Calculate total order price, accounting for possible discount
   const ToTalOrderPrice = cart.ToTalPriceAfterDiscount ? cart.ToTalPriceAfterDiscount : cart.ToTalPrice;
 
-  // Create a new order object
   const order = new orderModel({
-    user: req.user._id,  // Get user from req.user
-    ToTalOrderPrice,     // Use the calculated total price
-    shippingAddress: req.body.shippingAddress, // From the request body
-    items: cart.items,   // Use items from the cart
-    paymentMethod: req.body.paymentMethod || 'cash',  // Default to 'cash' if not provided
+    user: req.user._id,  
+    ToTalOrderPrice,    
+    shippingAddress: req.body.shippingAddress, 
+    items: cart.items,   
+    paymentMethod: req.body.paymentMethod || 'cash',  
   });
-
-  // Save the order
   await order.save();
-
   if (order) {
     // Prepare bulk update options to decrease product quantities and increase sold quantities
     let options = cart.items.map(item => ({
@@ -36,17 +32,12 @@ const createCashOrder = catchError(async (req, res, next) => {
         update: { $inc: { quantity: -item.quantity, sold: item.quantity } },
       },
     }));
-
-    // Update product quantities in bulk
     await ProductModel.bulkWrite(options);
 
     // Delete the cart after the order has been successfully created
     await cartModel.findByIdAndDelete(req.params.id);
-
-    // Respond with a success message and the created order
     return res.status(201).json({ msg: 'Success', order });
   } else {
-    // If the order creation fails, return an error
     return next(new generateError('Failed to create order', 500));
   }
 });
@@ -63,8 +54,7 @@ const getAllOrder =getAll(orderModel)
 
 const createSessionOrder =catchError (async(req,res,next)=>{
   const cart = await cartModel.findById(req.params.id)
-  const ToTalOrderPrice = cart.ToTalPriceAfterDiscount ?
-  cart.ToTalPriceAfterDiscount:cart.ToTalPrice
+  const ToTalOrderPrice = cart.ToTalPriceAfterDiscount ?cart.ToTalPriceAfterDiscount:cart.ToTalPrice
 
    let session = await stripe.checkout.sessions.create({
 
@@ -77,7 +67,7 @@ const createSessionOrder =catchError (async(req,res,next)=>{
     quantity:1}
     ],
     mode:"payment",
-    success_url:`${process.env.Base_Url}/Api/v1`,
+    success_url:`${process.env.Base_Url}/Api/v1/orders`,
     cancel_url:`${process.env.Base_Url}`,
     customer_email : req.user.email ,
     client_reference_id : req.params.id ,
@@ -88,61 +78,85 @@ const createSessionOrder =catchError (async(req,res,next)=>{
    return res.status(200).json({ status: 'Success', session });
 })
 
-const createOnlineOrder =catchError(async(request, response) => {
+const createOnlineOrder = catchError(async (request, response, next) => {
+  console.log('Webhook received');
   const sig = request.headers['stripe-signature'].toString();
   let event;
 
   try {
     event = stripe.webhooks.constructEvent(request.body, sig, 'whsec_tLXVzmLYXjqwuhBPXeN6I4Vpz47hJqs0');
+    console.log('Received webhook:', request.body);
+    console.log('Stripe signature:', sig);
   } catch (err) {
     return response.status(400).send(`Webhook Error: ${err.message}`);
-    
   }
 
   // Handle the event
-  if(event.type == 'checkout.session.completed' ){
+  if (event.type === 'checkout.session.completed') {
     const checkoutSessionCompleted = event.data.object;
-    card(checkoutSessionCompleted,res) 
-    console.log(`Create Order here`);
-
-  }else{
-    console.log(`Unhandled event type ${event.type}`);
-    
+    if (checkoutSessionCompleted.payment_status === 'paid') {
+      console.log('Payment is complete. Creating order...');
+      await card(checkoutSessionCompleted, response, next); 
+    } else {
+      console.log('Payment not completed yet');
+    }
   }
-})
+});
 
-async function card(e , res){
-  const cart = await cartModel.findById(e.client_reference_id)
-  if (!cart) return next(new generateError('not found',404))
-   let user = await userModel.findOne({email : e.email})
+async function card(checkoutSessionCompleted, res, next) {
+  console.log('Client Reference ID:', checkoutSessionCompleted.client_reference_id);
+  
+  // Find the cart using the client reference ID
+  const cart = await cartModel.findById(checkoutSessionCompleted.client_reference_id);
+  if (!cart) {
+    console.log('Cart not found for ID:', checkoutSessionCompleted.client_reference_id);
+    return next(new generateError('Cart not found', 404));
+  }
+
+  // Find the user using the email from the session
+  let user = await userModel.findOne({ email: checkoutSessionCompleted.email });
+  console.log('User found:', user);
+
+  // Create a new order
   const order = new orderModel({
-    user : user._id ,
-    total_price : e.unit_amount/100 ,
-    shippingAddress : e.metadata.shippingAddress,
-    items : cart.items,
-    paymentMethod : 'card',
-    isPaid : true ,
-    paidAt : Date.now()
-  })
-  await order.save()
+    user: user._id,
+    total_price: checkoutSessionCompleted.amount_total / 100,  // Assuming the amount is in cents
+    shippingAddress: checkoutSessionCompleted.metadata.shippingAddress,
+    items: cart.items,
+    paymentMethod: 'card',
+    isPaid: true,
+    paidAt: Date.now(),
+  });
 
-  if(order){
-    let Options = cart.items.map(item=>({
-      updateOne: {
-        filter:{ _id: item.product },
-        update  :{ $inc:{quantity:-item.quantity,sold:item.quantity} }}
-      
-    
-    }))
-   await ProductModel.bulkWrite(Options)
-   await cartModel.findByIdAndDelete(req.params.id)
-   return res.status(200).json({ status: 'Success', order });
-   
-  }else{
-    return next(new generateError('not found',404))
+  try {
+    await order.save();
+    console.log('Order saved successfully');
+  } catch (err) {
+    console.log('Error saving order:', err);
+    return next(new generateError('Error saving order', 500));
   }
 
+  if (order) {
+    const options = cart.items.map(item => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: item.quantity } },
+      }
+    }));
+
+    try {
+      await ProductModel.bulkWrite(options);
+      await cartModel.findByIdAndDelete(cart._id);  // Use the cart's _id to delete it
+      return res.status(200).json({ status: 'Success', order });
+    } catch (err) {
+      console.log('Error updating products or deleting cart:', err);
+      return next(new generateError('Error processing order', 500));
+    }
+  } else {
+    return next(new generateError('Order creation failed', 500));
+  }
 }
+
   
   export{
     createCashOrder,getSpecifiedOrder,getAllOrder,createSessionOrder,createOnlineOrder

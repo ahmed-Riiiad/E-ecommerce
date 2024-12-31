@@ -3,24 +3,6 @@ import  {ProductModel} from "../../../database/models/Products.model.js"
 import slugify from "slugify"
 import {  deleteOne, getAll, getOne } from "../../utiles/handlerFactory.js"
 
-// const createProduct = catchError(async (req, res) => {
-//   if (!req.files || !req.files.imgCover || !req.files.imgs) {
-//       return res.status(400).json({ msg: "Please upload image files" });
-//   }
-//   req.body.slug = slugify(req.body.Title);
-//   req.body.imgCover = req.files.imgCover[0].filename;
-//   req.body.imgs = req.files.imgs.map(file => file.filename);
-//   console.log(req.files)
-
-//   const newProduct = new ProductModel(req.body);
-//   await newProduct.save();
-
-//   // Return the created product as a response
-//   res.status(201).json({
-//       msg: 'Product created successfully',
-//       product: newProduct
-//   });
-// });
 
 const createProduct = catchError(async (req, res) => {
   if (!req.body.Title || typeof req.body.Title !== 'string') {

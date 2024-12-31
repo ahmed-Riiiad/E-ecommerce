@@ -1,5 +1,5 @@
 process.on('uncaughtException',(err)=>{
-    console.log('error');
+    console.log('error' , err);
 })
 import express from 'express';
 import * as dotenv from 'dotenv'
@@ -15,9 +15,6 @@ import hpp from 'hpp';
 import { createOnlineOrder } from './src/modules/order/order.controler.js';
 
 const app = express()
-app.post('/webhook', express.raw({type: 'application/json'}),createOnlineOrder);
-  
-  app.listen(4242, () => console.log('Running on server port 4242'));
 //Global MiddleWare
 // 1- security http headers
     app.use(helmet())
@@ -34,6 +31,7 @@ app.post('/webhook', express.raw({type: 'application/json'}),createOnlineOrder);
     app.use('/Api', limiter)
 // 4- body parser , reading data from req body 
     app.use(cors())
+app.post('/webhook', express.raw({type: 'application/json'}),createOnlineOrder);
     app.use(express.json({limit : '10kb'}))
 // 5- Data Sanitization against NoSql query injection
     app.use(MongoSanitize())
