@@ -24,7 +24,7 @@ import Mongoose from "mongoose"
 )
 
 CategorySchema.post('save',(doc)=>{
-    doc.imgs= process.env.Base_Url +"/category/"+ doc.imgs
+    doc.imgs= process.env.BASE_URL +"/category/"+ doc.imgs
     console.log(doc)
 })
 

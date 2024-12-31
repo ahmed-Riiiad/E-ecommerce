@@ -75,8 +75,8 @@ import mongoose from "mongoose"
 
 ProductSchema.post('save',(doc)=>{
     console.log(doc)
-    doc.imgCover= process.env.Base_Url +"/product/"+ doc.imgCover
-    doc.imgs = doc.imgs.map((path=>process.env.Base_Url +"/product/"+ path))
+    doc.imgCover= process.env.BASE_URL +"/product/"+ doc.imgCover
+    doc.imgs = doc.imgs.map((path=>process.env.BASE_URL +"/product/"+ path))
 })
 
 ProductSchema.virtual('myReview',{

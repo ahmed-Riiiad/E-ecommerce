@@ -28,11 +28,11 @@ export class Email {
         }
         // Local SMTP or other environment transport
         return nodemailer.createTransport({
-            host: process.env.E-mail_HOST,
-            port: process.env.E-mail_PORT,
+            host: process.env.EMAIL_HOST,
+            port: process.env.EMAIL_PORT,
             auth: {
-                user: process.env.E-mailUserName,
-                pass: process.env.E-mail_Password
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD
             }
         });
     }

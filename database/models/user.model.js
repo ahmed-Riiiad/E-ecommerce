@@ -78,7 +78,7 @@ const user_schema = Mongoose.Schema(
 
 // user_schema.post('find',(doc)=>{
 //   console.log(doc)
-//   doc.photo= process.env.Base_Url +"/users/"+ doc.photo
+//   doc.photo= process.env.BASE_URL +"/users/"+ doc.photo
 // })
 
 // Pre-save hook to hash password and remove passwordConfirm field

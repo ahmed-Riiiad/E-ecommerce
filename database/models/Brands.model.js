@@ -21,7 +21,7 @@ const BrandSchema = Mongoose.Schema(
 
 BrandSchema.post('save',(doc)=>{
     console.log(doc)
-    doc.logo= process.env.Base_Url +"/brand/"+ doc.logo
+    doc.logo= process.env.BASE_URL +"/brand/"+ doc.logo
 })
 
 export const BrandModel = Mongoose.model('Brand',BrandSchema)

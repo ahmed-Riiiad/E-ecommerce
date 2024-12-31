@@ -67,8 +67,8 @@ const createSessionOrder =catchError (async(req,res,next)=>{
     quantity:1}
     ],
     mode:"payment",
-    success_url:`${process.env.Base_Url}/Api/v1/orders`,
-    cancel_url:`${process.env.Base_Url}`,
+    success_url:`${process.env.BASE_URL}/Api/v1/orders`,
+    cancel_url:`${process.env.BASE_URL}`,
     customer_email : req.user.email ,
     client_reference_id : req.params.id ,
     metadata : req.body.shippingAddress
