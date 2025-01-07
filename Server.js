@@ -50,7 +50,7 @@ init(app)
 // DataBase Connection
 const port = 3000
 DataBase()
-app.listen( port , () => console.log(`server is Running on local port ${port} `))
+app.listen(process.env.PORT || port , () => console.log(`server is Running on local port ${port} `))
 
 // unhandledRejection error 
 process.on('unhandledRejection',(err)=>{
