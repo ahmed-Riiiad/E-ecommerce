@@ -17,32 +17,32 @@ import { createOnlineOrder } from './src/modules/order/order.controler.js';
 const app = express()
 //Global MiddleWare
 // 1- security http headers
-    app.use(helmet())
+app.use(helmet())
 // 2- development logging
-    if(process.env.NODE_ENV === 'development'){
-        app.use(morgan('dev'))
-    }
+if(process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev'))
+}
 // 3- limit req from samp ip        
-    const limiter = rateLimit({
+const limiter = rateLimit({
         max: 100 ,
         windowMs : 60 * 60 * 1000 ,
         message : 'too Many Request from this ip '
     })
-    app.use('/Api', limiter)
+app.use('/Api', limiter)
 // 4- body parser , reading data from req body 
-    app.use(cors())
+app.use(cors())
 app.post('/webhook', express.raw({type: 'application/json'}),createOnlineOrder);
-    app.use(express.json({limit : '10kb'}))
+app.use(express.json({limit : '10kb'}))
 // 5- Data Sanitization against NoSql query injection
     app.use(MongoSanitize())
 // 6- prevent parameter pollution (sending more than filed in url )
-    app.use(hpp({
-        whitelist : [
-            'price'
-        ]
-    }))
+app.use(hpp({
+   whitelist : [
+    'price'
+    ]
+}))
 // 7- server static files 
-    app.use(express.static('/UpLoads')) 
+app.use(express.static('/UpLoads')) 
 
 // Routes 
 init(app) 
@@ -50,7 +50,7 @@ init(app)
 // DataBase Connection
 const port = 3000
 DataBase()
-app.listen(process.env.PORT || port , () => console.log(`server is Running on local port ${port} `))
+app.listen( port , () => console.log(`server is Running on local port ${port} `))
 
 // unhandledRejection error 
 process.on('unhandledRejection',(err)=>{
