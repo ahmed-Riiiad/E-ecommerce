@@ -16,7 +16,7 @@ import { globalError } from "./utiles/globalErrorMidillware.js"
 export function init(app) {
 app.use('/Api/v1/categories',categoryRouter)
 app.get('/', (req, res) => {
-    res.send('Hello, world!');
+    res.json('Hello, world!');
   });  
 app.use('/Api/v1/subcategories',SubcategoryRouter)
 app.use('/Api/v1/Brands',BrandRouter)
