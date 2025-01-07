@@ -1,5 +1,5 @@
 process.on('uncaughtException',(err)=>{
-    console.log('error' , err);
+    console.log('uncaughtException_error' , err);
 })
 import express from 'express';
 import * as dotenv from 'dotenv'
@@ -54,5 +54,5 @@ app.listen(process.env.PORT || port , () => console.log(`server is Running on lo
 
 // unhandledRejection error 
 process.on('unhandledRejection',(err)=>{
-    console.log('error',err)
+    console.log('unhandledRejection_error',err)
 })
