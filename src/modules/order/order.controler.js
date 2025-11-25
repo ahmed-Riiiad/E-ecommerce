@@ -5,6 +5,7 @@ import { orderModel } from "../../../database/models/order.model .js";
 import { ProductModel } from "../../../database/models/Products.model.js";
 import { getAll } from "../../utiles/handlerFactory.js";
 import Stripe from 'stripe';
+import { userModel } from "../../../database/models/user.model.js";
 
 const stripe = new Stripe("sk_test_51NgtZqCEumfOCBvQ04dmbvhIelfdV6WaimfNeMkFpaxU67n5gOO02rQmK0H80QvyYJsstlmb4pD5uk44PRMXzbxH0029fxWMgM");
 
@@ -81,26 +82,71 @@ const createSessionOrder =catchError (async(req,res,next)=>{
 const createOnlineOrder = catchError(async (request, response, next) => {
   console.log('Webhook received');
   const sig = request.headers['stripe-signature'].toString();
+  const endPoint = 'whsec_tLXVzmLYXjqwuhBPXeN6I4Vpz47hJqs0'
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, 'whsec_tLXVzmLYXjqwuhBPXeN6I4Vpz47hJqs0');
+    event = stripe.webhooks.constructEvent(request.body, sig, endPoint);
     console.log('Received webhook:', request.body);
     console.log('Stripe signature:', sig);
   } catch (err) {
     return response.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
-  if (event.type === 'checkout.session.completed') {
-    const checkoutSessionCompleted = event.data.object;
-    if (checkoutSessionCompleted.payment_status === 'paid') {
-      console.log('Payment is complete. Creating order...');
-      await card(checkoutSessionCompleted, response, next); 
-    } else {
-      console.log('Payment not completed yet');
-    }
+// Handle the checkout session completion event
+if (event.type === "checkout.session.completed") {
+  let e = event.data.object;
+  let cart = await cartModel.findById(e.client_reference_id);
+  let user = await userModel.findOne({ email: e.customer_email });
+
+  // Check if the cart has items
+  if (cart.item[0]) {
+      // Create a new order with the event data
+      let order = new orderModel({
+          user: user,
+          items: cart.items,
+          shippingAddress: e.metadata.shippingAddress,
+          ToTalOrderPrice: e.amount_total / 100,
+          paymentMethod: 'card',
+          isPaid: true,
+          paidAt: Date.now()
+      });
+
+      // Adjust total price if there's a discount
+      if (cart.ToTalPriceAfterDiscount) {
+          order.ToTalOrderPrice = cart.ToTalPriceAfterDiscount;
+      }
+
+      // Save the order to the database
+      await order.save();
+
+      // Update product quantities and sold counts in bulk
+      if (order) {
+          let option = cart.item.filter(item => item.quantity > 0).map((item) => ({
+              updateOne: {
+                  filter: { _id: item.product },
+                  update: { $inc: { quantity: -item.quantity, sold: item.quantity } }
+              }
+          }));
+          await ProductModel.bulkWrite(option);
+      }
+
+      // Clear the cart items
+      await cartModel.findOneAndUpdate({ user: user._id }, { $set: { 'item': [] } }, { new: true });
+
+      // Respond with success message and the created order
+      return res.status(200).json({
+          status: 'success',
+          message: 'online payment created successfully',
+          data: order
+      });
   }
+
+  // If cart is empty, pass an error to the next middleware
+  next(new AppError('cart is empty!!!', 404));
+} else {
+  console.log(`Unhandled event type ${event.type}`);
+}
 });
 
 async function card(checkoutSessionCompleted, res, next) {
