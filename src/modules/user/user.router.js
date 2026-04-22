@@ -1,8 +1,7 @@
 import Express  from "express";
 import { GetMe, UnActiveMe, UpdateME, UpdateUser, changeUserPass, createUser, deleteUser, getAllUser, getOneUser } 
 from "./user.controler.js";
-import { ResetPassword, allowedTo, forgetPassword, protectedRoutes,
-signIN, signUP, updateMyPassword, verify } from "../auth/auth.controler.js";
+import { allowedTo, protectedRoutes, updateMyPassword } from "../auth/auth.controler.js";
 import { upLoadFile } from "../../midellware/uploadFile.js";
 
 
