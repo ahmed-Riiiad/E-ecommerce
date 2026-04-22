@@ -6,8 +6,8 @@ AuthRouter.post('/signUP', signUP)
 AuthRouter.post('/signIn', signIN)
 AuthRouter.post('/ForgetPassword', forgetPassword)
 AuthRouter.patch('/updatePassword', protectedRoutes , updateMyPassword)
-AuthRouter.post('/verify/:token', verify)
 AuthRouter.patch('/ResetPassword/:token', ResetPassword)
+//AuthRouter.post('/verify/:token', verify)
 
 
 export default AuthRouter

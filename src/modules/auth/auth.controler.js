@@ -30,25 +30,24 @@ export const signUP = catchError(async (req, res, next) => {
             password,
             passwordConfirm,
         });
-        let token2 = jwt.sign(
-            {
-              email 
-            },
-            process.env.VERIFY_TOKEN,
-            { expiresIn: process.env.TOKEN_EXPIRE }
-        );
+        // let token2 = jwt.sign(
+        //     {
+        //       email 
+        //     },
+        //     process.env.VERIFY_TOKEN,
+        //     { expiresIn: process.env.TOKEN_EXPIRE }
+        // );
 
-        // Send a welcome email to the user
-        const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/verify/${token2}`;
-        // console.log(url)
-        await new Email(newUser, url).verifyEmail();
+         // Send a welcome email to the user
+        // const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/verify/${token2}`;
+         // console.log(url)
+        // await new Email(newUser, url).verifyEmail();
         await newUser.save();
 
         // Return the success response with the user details and token
         res.status(201).json({
             message: 'success',
-            newUser,
-            token2
+            newUser
         });
     } catch (error) {
         next(error);
@@ -56,17 +55,17 @@ export const signUP = catchError(async (req, res, next) => {
 });
 
 // verify
-export const verify = async(req,res,next)=>{
-    const {token } = req.params
-        jwt.verify(token ,process.env.VERIFY_TOKEN , async (err , decoded)=>{
-       if (err){
-       return res.json(err)
-        }else {
-          await userModel.findOneAndUpdate({email : decoded.email},{ verified : true})
-       res.status(201).json({ status:"success" })
-               }
-            }) 
-}
+// export const verify = async(req,res,next)=>{
+//     const {token } = req.params
+//         jwt.verify(token ,process.env.VERIFY_TOKEN , async (err , decoded)=>{
+//        if (err){
+//        return res.json(err)
+//         }else {
+//           await userModel.findOneAndUpdate({email : decoded.email},{ verified : true})
+//        res.status(201).json({ status:"success" })
+//                }
+//             }) 
+// }
 
 
   // log In
@@ -82,11 +81,11 @@ export const verify = async(req,res,next)=>{
     if (!user) {
         return next(new generateError('Email not found', 409));
     }
-    const url = `${req.protocol}://${req.get('host')}/Api/v1/users/me`;
+    // const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/me`;
     // Check if the user is verified
-    if (user.verified === false) {
-        return next(new generateError('Your account has been un verified. Please verify your email.', 403));
-    }
+    // if (user.verified === false) {
+    //     return next(new generateError('Your account has been un verified. Please verify your email.', 403));
+    // }
 
     // Compare the provided password with the stored hash
     const match = await bcrypt.compare(password, user.password);
