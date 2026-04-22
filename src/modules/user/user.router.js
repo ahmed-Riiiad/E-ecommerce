@@ -33,9 +33,9 @@ userRouter.
 
 
 // auth
-userRouter.post('/signUP', signUP)
-userRouter.post('/signIn', signIN)
-userRouter.post('/verify/:token', verify)
-userRouter.post('/ForgetPassword', forgetPassword)
-userRouter.patch('/ResetPassword/:token', ResetPassword)
+// userRouter.post('/signUP', signUP)
+// userRouter.post('/signIn', signIN)
+// userRouter.post('/verify/:token', verify)
+// userRouter.post('/ForgetPassword', forgetPassword)
+// userRouter.patch('/ResetPassword/:token', ResetPassword)
 export default userRouter;

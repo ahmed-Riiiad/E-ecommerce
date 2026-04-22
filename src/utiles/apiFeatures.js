@@ -20,7 +20,7 @@ filterByKeyword() {
     delete filtration[q]
   })
   filtration = JSON.stringify(filtration)
-  filtration = filtration.replace(/\b(gt|gte|ltg|lte)\b/g,match=>`$${match}`)
+  filtration = filtration.replace(  /\b(gt|gte|ltg|lte)\b/g ,  match=>`$${match}`)
   filtration = JSON.parse(filtration);
   this.mongooseQuery.find(filtration)
   return this

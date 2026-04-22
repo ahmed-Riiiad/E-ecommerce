@@ -16,7 +16,7 @@ export class Email {
     }
 
     newTransporter() {
-        if (process.env.NODE_ENV === 'devlopment') {
+        if (process.env.NODE_ENV === 'dev') {
             // SendGrid or Gmail transport
             return nodemailer.createTransport({
                 service: 'gmail',

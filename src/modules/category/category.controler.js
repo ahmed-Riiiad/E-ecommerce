@@ -20,7 +20,7 @@ const UpdateCategory =catchError (async(req,res,next)=>{
   req.body.slug= slugify( req.body.name)
   req.body.imgs = req.file.filename 
   let result =await CategoryModel.findByIdAndUpdate(id, req.body ,{new:true})
-  !result && next(new generateError('not found'),404)
+  !result && next(new generateError('not found',404))
   result && res.json({msg : 'success',result})
 })
 
