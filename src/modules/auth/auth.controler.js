@@ -39,7 +39,7 @@ export const signUP = catchError(async (req, res, next) => {
         );
 
         // Send a welcome email to the user
-        const url = `${req.protocol}://${req.get('host')}/Api/v1/users/verify/${token2}`;
+        const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/verify/${token2}`;
         // console.log(url)
         await new Email(newUser, url).verifyEmail();
         await newUser.save();
@@ -48,6 +48,7 @@ export const signUP = catchError(async (req, res, next) => {
         res.status(201).json({
             message: 'success',
             newUser,
+            token2
         });
     } catch (error) {
         next(error);
