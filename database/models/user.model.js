@@ -62,9 +62,14 @@ const user_schema = Mongoose.Schema(
       type: Boolean,
       default: false,
     },
+passwordResetCode: String,
+passwordResetVerified: {
+  type: Boolean,
+  default: false,
+},
     passwordChangeAT: Date,
-    PasswordResetToken: String,
-    PasswordResetExpires: Date,
+    // PasswordResetToken: String,
+    // PasswordResetExpires: Date,
     active: {
       type: Boolean,
       default: true,

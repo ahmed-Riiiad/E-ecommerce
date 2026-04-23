@@ -30,18 +30,19 @@ export const signUP = catchError(async (req, res, next) => {
             password,
             passwordConfirm,
         });
-        // let token2 = jwt.sign(
-        //     {
-        //       email 
-        //     },
-        //     process.env.VERIFY_TOKEN,
-        //     { expiresIn: process.env.TOKEN_EXPIRE }
-        // );
+        let token2 = jwt.sign(
+            {
+              email 
+            },
+            process.env.VERIFY_TOKEN,
+            { expiresIn: process.env.TOKEN_EXPIRE }
+        );
 
-         // Send a welcome email to the user
-        // const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/verify/${token2}`;
-         // console.log(url)
-        // await new Email(newUser, url).verifyEmail();
+        // Send a welcome email to the user
+        const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/verify/${token2}`;
+         console.log(url)
+         const ur = `http://localhost:4200/verify/${token2}`;
+        await new Email(newUser, url).verifyEmail();
         await newUser.save();
 
         // Return the success response with the user details and token
@@ -54,22 +55,21 @@ export const signUP = catchError(async (req, res, next) => {
     }
 });
 
-// verify
-// export const verify = async(req,res,next)=>{
-//     const {token } = req.params
-//         jwt.verify(token ,process.env.VERIFY_TOKEN , async (err , decoded)=>{
-//        if (err){
-//        return res.json(err)
-//         }else {
-//           await userModel.findOneAndUpdate({email : decoded.email},{ verified : true})
-//        res.status(201).json({ status:"success" })
-//                }
-//             }) 
-// }
+// verify_signUp
+export const verify = async(req,res,next)=>{
+    const {token } = req.params
+        jwt.verify(token ,process.env.VERIFY_TOKEN , async (err , decoded)=>{
+       if (err){
+       return res.json(err)
+        }else {
+          await userModel.findOneAndUpdate({email : decoded.email},{ verified : true})
+       res.status(201).json({ status:"success" })
+               }
+            }) 
+}
 
-
-  // log In
-  export const signIN = catchError(async (req, res, next) => {
+// log In
+export const signIN = catchError(async (req, res, next) => {
     const { password, email } = req.body;
 
     if (!email || !password) {
@@ -81,11 +81,11 @@ export const signUP = catchError(async (req, res, next) => {
     if (!user) {
         return next(new generateError('Email not found', 409));
     }
-    // const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/me`;
+    const url = `${req.protocol}://${req.get('host')}/Api/v1/auth/me`;
     // Check if the user is verified
-    // if (user.verified === false) {
-    //     return next(new generateError('Your account has been un verified. Please verify your email.', 403));
-    // }
+    if (user.verified === false) {
+        return next(new generateError('Your account has been un verified. Please verify your email.', 403));
+    }
 
     // Compare the provided password with the stored hash
     const match = await bcrypt.compare(password, user.password);
@@ -122,6 +122,114 @@ export const signUP = catchError(async (req, res, next) => {
     });
 });
 
+
+// forgetPassword
+export const forgetPassword = catchError(async (req, res, next) => {
+    const user = await userModel.findOne({ email: req.body.email });
+  
+    if (!user) return next(new generateError('Email does not exist', 404));
+  
+    // generate 6 digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+    // hash code
+    const hashedCode = crypto
+      .createHash('sha256')
+      .update(resetCode)
+      .digest('hex');
+  
+    user.passwordResetCode = hashedCode;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 min
+    user.passwordResetVerified = false;
+  
+    await user.save({ validateBeforeSave: false });
+  
+    try {
+      await new Email(user, resetCode).sendPasswordReset();
+  
+      res.status(200).json({
+        status: 'success',
+        message: 'Code sent to email',
+      });
+    } catch (err) {
+      user.passwordResetCode = undefined;
+      user.passwordResetExpires = undefined;
+      user.passwordResetVerified = false;
+  
+      await user.save({ validateBeforeSave: false });
+  
+      return next(new generateError(err.message, 500));
+    }
+  });
+
+
+// verifyResetCode
+export const verifyResetCode = catchError(async (req, res, next) => {
+    const hashedCode = crypto
+      .createHash('sha256')
+      .update(req.body.code)
+      .digest('hex');
+  
+    // const user = await userModel.findOne({
+    //   passwordResetCode: hashedCode,
+    //   passwordResetExpires: { $gt: Date.now() },
+    // });
+    const user = await userModel.findOne({
+        passwordResetCode: hashedCode,
+      });
+      
+      console.log("USER FOUND:", user);
+  
+    if (!user) {
+      return next(new generateError('Code invalid or expired', 400));
+    }
+  
+    user.passwordResetVerified = true;
+    await user.save({ validateBeforeSave: false });
+  
+    res.status(200).json({
+      status: 'success',
+      message: 'Code verified',
+    });
+});
+
+//reset password    
+export const ResetPassword = catchError(async (req, res, next) => {
+        const user = await userModel.findOne({
+          email: req.body.email,
+        });
+        // const user = await userModel.findOne({
+        //     passwordResetVerified: true,
+        //   });
+        if (!user) return next(new generateError('User not found', 404));
+      
+        if (!user.passwordResetVerified) {
+          return next(new generateError('Code not verified', 400));
+        }
+      
+        user.password = req.body.password;
+      
+        user.passwordResetCode = undefined;
+        user.passwordResetExpires = undefined;
+        user.passwordResetVerified = false;
+      
+        await user.save();
+      
+        // generate token
+        const token = jwt.sign(
+          {
+            user_id: user._id,
+            email: user.email,
+          },
+          process.env.TOKEN_PASS,
+          { expiresIn: process.env.TOKEN_EXPIRE }
+        );
+      
+        res.status(200).json({
+          status: 'success',
+          token,
+        });
+      });
 
 
 //authentication
@@ -175,84 +283,6 @@ export const allowedTo = (...roles)=>{
         next()
     })
 }
-
-
-//forget Password
-export const forgetPassword = catchError(async (req, res, next) => {
-    // Get user based on posted email
-    const user = await userModel.findOne({ email: req.body.email });
-
-    if (!user) return next(new generateError('Email does not exist', 404));
-
-    // Generate random reset token
-    const resetToken = user.createPasswordResetToken();  
-
-    // Save the user with the token and expiration 
-    await user.save({ validateBeforeSave: false });
-
-    // Send reset token to user email
-    try {
-        const resetUrl = `${req.protocol}://${req.get('host')}/Api/v1/users/ResetPassword/${resetToken}`;
-        console.log('Reset URL:', resetUrl);
-        await new Email(user, resetUrl).sendPasswordReset();
-
-        res.status(200).json({
-            status: 'Success',
-            message: 'Token sent to email',
-        });
-    } catch (err) {
-        // If there is an error while sending email, clear the token fields
-        user.PasswordResetToken = undefined;
-        user.PasswordResetExpires = undefined;
-        await user.save({ validateBeforeSave: false });
-
-        return next(new generateError('There was an error while sending the email', 500));
-    }
-});
-
-
-
-//reset password    
-export const ResetPassword = catchError(async (req,res,next) =>{
-    //get user based on token
-    const hashedToken = crypto.createHash('sha256')
-    .update(req.params.token)
-    .digest('hex')
-  
-    const user = await userModel.findOne({
-        PasswordResetToken : hashedToken,
-        PasswordResetExpires : {$gt : Date.now()}
-    })
-    
-    //if token has not expire ,and there is an user , set the new password
-    if (!user)  return next(new generateError('token not valid', 404))
-
-    await user.save({validateBeforeSave : false })
-    user.password = req.body.password
-    user.PasswordResetToken = undefined
-    user.PasswordResetExpires = undefined
-    await user.save()
-
-    //4- log the user in , send jwt 
-    let token = jwt.sign(
-        {   name:user.name,
-            email:user.email,
-            user_id:user._id,
-            role : user.role
-        }, process.env.TOKEN_PASS ,{expiresIn : process.env.TOKEN_EXPIRE}
-    )
-     // send jwt in cookie to prevent attacker hack pass in local storage 
-     const cookieOptions = {
-        expires : new Date(
-          Date.now() + process.env.TOKEN_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-        ),
-        httpOnly : true
-      }
-      if(process.env.NODE_ENV === 'production') cookieOptions.secure = true
-      res.cookie('jwt', token ,cookieOptions )
-
-      res.status(201).json({ status:"success", token })
-    })
 
 
 //update password

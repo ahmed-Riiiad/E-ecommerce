@@ -67,11 +67,15 @@ export class Email {
     }
 
     async sendPasswordReset() {
-        await this.send('passwordReset', 'Your password reset token (valid for 10 min)');
+        await this.send('passwordResetCode', 'Your verification code');
     }
     async verifyEmail() {
         await this.send('verifyEmail', 'Plz , Verify Your Email');
     }
+
+    // async sendPasswordResetCode() {
+    //     await this.send('passwordResetCode', 'Your verification code');
+    // }
 }
 
 
